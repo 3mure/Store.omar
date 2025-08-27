@@ -60,9 +60,23 @@ namespace Persistence.Repository
             _context.Set<TEntity>().Remove(entity);
         }
 
-       
+        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpacification<TEntity, Tkey> spec, bool trackChange = false)
+        {
+          return await  ApplySpacification(spec).ToListAsync();
+        }
 
-       
-       
+        public async Task<TEntity> GetByIdAsync(ISpacification<TEntity, Tkey> spec)
+        {
+           return await ApplySpacification(spec).FirstOrDefaultAsync();
+        }
+        public async Task<int> CountAsync(ISpacification<TEntity, Tkey> spec)
+        {
+            return await ApplySpacification(spec).CountAsync();
+        }
+        private  IQueryable<TEntity> ApplySpacification(ISpacification<TEntity,Tkey>spec) 
+        {
+            return SpacificationEvaluator.GetQuery(_context.Set<TEntity>(), spec);
+        }
+
     }
 }
