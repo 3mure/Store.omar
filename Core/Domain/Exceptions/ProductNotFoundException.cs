@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Contract
+namespace Domain.Exceptions
 {
-    public interface IDbIntializer
+    public class ProductNotFoundException(int ID) : NotFoundException($"Product with ID {ID} NotFound ")
     {
-        Task InitializeAsync();
-        Task IdentityInitializeAsync();
 
     }
 }
