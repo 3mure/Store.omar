@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Contract
+namespace Domain.Exceptions
 {
-    public interface IDbIntializer
+    public class NotFoundException (string message) : Exception (message)
     {
-        Task InitializeAsync();
-        Task IdentityInitializeAsync();
-
+       
     }
 }

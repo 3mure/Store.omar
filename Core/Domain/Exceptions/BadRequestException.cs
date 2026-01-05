@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Contract
+namespace Domain.Exceptions
 {
-    public interface IDbIntializer
+    public class BadRequestException(string Message) : Exception(Message)
     {
-        Task InitializeAsync();
-        Task IdentityInitializeAsync();
-
+  
     }
 }

@@ -6,6 +6,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Domain.Contract;
 using Domain.Models;
+using Domain.Models.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Data;
 
@@ -14,11 +16,82 @@ namespace Persistence
     public class DbIntializer : IDbIntializer
     {
         private readonly StoreDbcontext _storeDbcontext;
+        private readonly StoreIdentityDbContext _IdentityContexct;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public DbIntializer(StoreDbcontext storeDbcontext)
+        public DbIntializer(StoreDbcontext storeDbcontext,
+            StoreIdentityDbContext IdentityContext,
+            UserManager<AppUser> userManager,
+            RoleManager<IdentityRole> roleManager
+
+            )
         {
            _storeDbcontext = storeDbcontext;
+           _IdentityContexct = IdentityContext;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
+
+        public async Task IdentityInitializeAsync()
+        {
+            //migrations if they are not applied
+            if (_IdentityContexct.Database.GetPendingMigrations().Any())
+            {
+                await _IdentityContexct.Database.MigrateAsync();
+            }
+            //seeding
+            if (!_roleManager.Roles.Any()) 
+            {
+               await _roleManager.CreateAsync ( new IdentityRole {Name="Admin" });
+                await _roleManager.CreateAsync(new IdentityRole { Name = "SuberAdmin" });
+
+            }
+
+            if (!_userManager.Users.Any())
+            {
+                var SuberAdmin = new AppUser
+                {
+                    DisplayName = "suberAdmin",
+                    Email = "SuberAdmin@gmail.com",
+                    UserName = "SuberAdmin",
+                    Address = new Address
+                    {
+                        FirstName = "Omar",
+                        LastName = "Ali",
+                        Street = "123 Main St",
+                        City = "Cairo",
+                        State = "Cairo"
+                    },
+                    PhoneNumber = "01123456789"
+
+                };
+                var Admin = new AppUser
+                {
+                    DisplayName = "Admin",
+                    Email = "Admin@gmail.com",
+                    UserName = "Admin",
+                    Address = new Address
+                    {
+                        FirstName = "Ahmed",
+                        LastName = "Ali",
+                        Street = "123 Main St",
+                        City = "Cairo",
+                        State = "Cairo"
+                    },
+                    PhoneNumber = "01123456789"
+
+                };
+                _userManager.CreateAsync(SuberAdmin, "P@ssW0rd").Wait();
+                _userManager.CreateAsync(Admin, "P@ssW0rd").Wait();
+
+                await _userManager.AddToRoleAsync(SuberAdmin, "SuberAdmin");
+                await _userManager.AddToRoleAsync(Admin, "Admin");
+
+
+            }
+        }
+
         public async Task InitializeAsync()
         {
             if (_storeDbcontext.Database.GetPendingMigrations().Any()) 
@@ -69,6 +142,7 @@ namespace Persistence
 
 
         }
+
     }
 
 }//C:\visual studio\Store.Omar\Infrastructure\Persistence\Seeding\products.json
